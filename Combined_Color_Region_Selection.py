@@ -25,8 +25,8 @@ rgb_threshold = [red_threshold, green_threshold, blue_threshold]
 # you'll find these are not sensible values!!
 # But you'll get a chance to play with them soon in a quiz ;)
 left_bottom = [0, 539]
-right_bottom = [900, 300]
-apex = [400, 0]
+right_bottom = [900, 539]
+apex = [450, 300]
 
 fit_left = np.polyfit((left_bottom[0], apex[0]), (left_bottom[1], apex[1]), 1)
 fit_right = np.polyfit((right_bottom[0], apex[0]), (right_bottom[1], apex[1]), 1)
