@@ -60,7 +60,7 @@ def region_of_interest(img, vertices):
     return masked_image
 
 
-def draw_lines(img, lines, color=[255, 0, 0], thickness=5):
+def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     """
     NOTE: this is the function you might want to use as a starting point once you want to 
     average/extrapolate the line segments you detect to map out the full
@@ -108,26 +108,60 @@ def weighted_img(img, initial_img, α=0.8, β=1., λ=0.):
     """
     return cv2.addWeighted(initial_img, α, img, β, λ)
 
-def slope_intercept(lines,imshape):
+def average_lines(lines,imshape):
     
     lines = lines[:,0,:]    
     lines_left = []
     lines_right = []
-        
+   # y0 = imshape[0]    
     
     for x1,y1,x2,y2 in lines:
         slope = (y2-y1)/(x2-x1)
-        x_intercept = y1-slope*x1        
+        x_intercept = y1-slope*x1
+        #x0 = float((y0-x_intercept)/slope)
         if slope < 0:  
             lines_left.append([slope,x_intercept])            
-        else:
+        elif slope > 0:
             lines_right.append([slope,x_intercept]) 
             
-    lines_left = np.asarray(lines_left)
-    lines_right = np.asarray(lines_right)       
+    left_lines = np.asarray(lines_left)
+    right_lines = np.asarray(lines_right)       
     
-        
-    return lines_left,lines_right
+    mean_left = np.mean(left_lines,axis=0)
+    mean_right = np.mean(right_lines,axis=0)    
+    
+    filt_left_lines = []
+    filt_right_lines =  []
+    
+    for line in lines_left:
+        diff = math.fabs((mean_left[0] - line[0])/mean_left[0])        
+        if diff < 0.15:
+            filt_left_lines.append(line)
+    for line in lines_right:
+        diff = math.fabs((mean_right[0]- line[0])/mean_left[0])
+        if diff < 0.15:
+            filt_right_lines.append(line)
+            
+    filt_left_lines = np.array(filt_left_lines)
+    filt_right_lines = np.array(filt_right_lines)
+    
+    mean_left = np.mean(filt_left_lines,axis=0)
+    mean_right = np.mean(filt_right_lines,axis=0)
+    
+    y1 = imshape[0]
+    y2 = imshape[0]*0.6  
+    
+    x1_left = (y1-mean_left[1])/mean_left[0]
+    x2_left = (y2-mean_left[1])/mean_left[0]
+    
+    x1_right = (y1-mean_right[1])/mean_right[0]
+    x2_right = (y2-mean_right[1])/mean_right[0]
+    
+    mean_lines = np.array(([[[x1_left,y1,x2_left,y2]],[[x1_right,y1,x2_right,y2]]]),dtype=np.int32)
+    mean_lines_img = np.zeros((imshape[0], imshape[1], 3), dtype=np.uint8)
+    draw_lines(mean_lines_img, mean_lines,color=[255, 0, 0], thickness=7)
+    
+    return mean_lines_img
 
 """
 def filter_lines(dict_lines): 
@@ -179,26 +213,9 @@ max_line_gap = 20    # maximum gap in pixels between connectable line segments
 
 [line_img,lines] = hough_lines(masked_edges,rho,theta,threshold,min_line_length,max_line_gap)
 
-[lines_left,lines_right] = slope_intercept(lines,imshape)
+mean_lines_img =  average_lines(lines,imshape)
 
-lane_left = np.mean(lines_left,axis=0)
-lane_right = np.mean(lines_right,axis=0)
-    
-y1 = imshape[0]
-y2 = imshape[0]*0.6  
-    
-x1_left = (y1-lane_left[1])/lane_left[0]
-x2_left = (y2-lane_left[1])/lane_left[0]
-    
-x1_right = (y1-lane_right[1])/lane_right[0]
-x2_right = (y2-lane_right[1])/lane_right[0]
-    
-lanes = np.array(([[[x1_left,y1,x2_left,y2]],[[x1_right,y1,x2_right,y2]]]),dtype=np.int32)
-#filtered_left_lines = filter_lines(lines_left)
 
-avg_line_img = np.zeros((imshape[0], imshape[1], 3), dtype=np.uint8)
-draw_lines(avg_line_img, lanes)
-
-raw_line_edges = weighted_img(avg_line_img,image,0.8,1,0)
+raw_line_edges = weighted_img(mean_lines_img,image,0.8,1,0)
 
 plt.imshow(raw_line_edges)
