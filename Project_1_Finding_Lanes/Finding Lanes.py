@@ -218,7 +218,8 @@ max_line_gap = 20    # maximum gap in pixels between connectable line segments
 mean_line_img =  average_lines(lines,imshape)
 
 
-raw_line_edges = weighted_img(mean_line_img,image,0.8,1,0)
+mean_lane_mark = weighted_img(mean_line_img,image,0.8,1,0)
+lane_mark = weighted_img(line_img,image,0.8,1,0)
 
-plt.imshow(raw_line_edges)
+plt.imshow(mean_lane_mark)
 
