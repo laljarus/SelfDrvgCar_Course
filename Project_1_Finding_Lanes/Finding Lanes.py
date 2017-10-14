@@ -6,11 +6,11 @@ import cv2
 #%matplotlib inline
 
 #import image
-image = mpimg.imread('test_images/solidYellowCurve2.jpg')
+image = mpimg.imread('test_images/whiteCarLaneSwitch.jpg')
 #printing out some stats and plotting
 
 print('This image is:', type(image), 'with dimensions:', image.shape)
-plt.imshow(image)  # if you wanted to show a single color channel image called 'gray', for example, call as plt.imshow(gray, cmap='gray')# -*- coding: utf-8 -*-
+#plt.imshow(image)  # if you wanted to show a single color channel image called 'gray', for example, call as plt.imshow(gray, cmap='gray')# -*- coding: utf-8 -*-
 
 
 # Definition of helper functions
@@ -135,18 +135,20 @@ def average_lines(lines,imshape):
     
     for line in lines_left:
         diff = math.fabs((mean_left[0] - line[0])/mean_left[0])        
-        if diff < 0.15:
+        if diff < 0.35:
             filt_left_lines.append(line)
     for line in lines_right:
         diff = math.fabs((mean_right[0]- line[0])/mean_left[0])
-        if diff < 0.15:
+        if diff < 0.35:
             filt_right_lines.append(line)
             
     filt_left_lines = np.array(filt_left_lines)
     filt_right_lines = np.array(filt_right_lines)
     
-    mean_left = np.mean(filt_left_lines,axis=0)
-    mean_right = np.mean(filt_right_lines,axis=0)
+    if len(filt_left_lines) > 0:
+        mean_left = np.mean(filt_left_lines,axis=0)
+    if len(filt_right_lines) > 0:
+        mean_right = np.mean(filt_right_lines,axis=0)
     
     y1 = imshape[0]
     y2 = imshape[0]*0.6  
@@ -186,8 +188,8 @@ kernel_size = 5
 blur_gray = gaussian_blur(image, kernel_size)
 
 # Canny edge detection
-low_threshold = 50
-high_threshold = 150
+low_threshold = 150
+high_threshold = 300
 edges = canny(image,low_threshold,high_threshold)
 
 # Masking relevent region
@@ -213,9 +215,10 @@ max_line_gap = 20    # maximum gap in pixels between connectable line segments
 
 [line_img,lines] = hough_lines(masked_edges,rho,theta,threshold,min_line_length,max_line_gap)
 
-mean_lines_img =  average_lines(lines,imshape)
+mean_line_img =  average_lines(lines,imshape)
 
 
-raw_line_edges = weighted_img(mean_lines_img,image,0.8,1,0)
+raw_line_edges = weighted_img(mean_line_img,image,0.8,1,0)
 
 plt.imshow(raw_line_edges)
+
