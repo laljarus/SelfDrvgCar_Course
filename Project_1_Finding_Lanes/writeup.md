@@ -6,7 +6,7 @@ The aim of this project is to find the lane markings on the road. The program ge
 
 1. Image is converted to gray scale inorder to be used in canny edge detection algorithm.
 Raw Image
-[Image of the road] ('test_images/whiteCarLaneSwitch.jpg')
+[Image of the road] ('https://github.com/laljarus/SelfDrvgCar_Course/blob/Project1_FindingLanes/Project_1_Finding_Lanes/test_images/solidWhiteCurve.jpg')
 
 
 
