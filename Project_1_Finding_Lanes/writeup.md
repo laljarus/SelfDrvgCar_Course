@@ -6,12 +6,14 @@ The aim of this project is to find the lane markings on the road. The program ge
 
 [//]: # (Image References)
 
-[image1]: ./test_images/solidWhiteCurve.jpg "Raw Image"
+[image1]: ./test_images/solidWhiteCurve.jpg "raw_image"
+[image2]: ./test_images_output/grayscale.jpg
 
 
 1. Image is converted to gray scale inorder to be used in canny edge detection algorithm.
 
-
+### Raw Image
 ![alt text][image1]
 
-
+### Grayscale
+![bla bla][image2]
